@@ -6,11 +6,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const isProduction = process.env.NODE_ENV == 'production';
 
 const entryProduction = {
-    'quill-extensions': './src/index.ts',
-    'demo': './src/demo.ts'
+    'quill-extensions': './src/index.ts'
 }
 const entryDevelopment = {
-    'quill-extensions': './src/index.ts'
+    'quill-extensions': './src/index.ts',
+    'demo': './src/demo.ts'
 }
 const config = {
     entry: './src/index.ts',
