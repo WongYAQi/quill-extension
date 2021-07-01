@@ -1,10 +1,11 @@
 import Quill from 'quill'
-import { TinyMCETheme} from './theme/tinymce'
+import { TinyMceTheme} from './theme/tinymce'
 
-console.log(TinyMCETheme)
+Quill.register('themes/tinymce', TinyMceTheme)
+
 window.onload = () => {
   const quill = new Quill('#editor-wrapper', {
-    theme: 'snow',
+    theme: 'tinymce',
     modules: {
       table: false
     }
