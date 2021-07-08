@@ -18,9 +18,9 @@ const config = {
     output: {
         path: path.resolve(__dirname, 'dist'),
     },
+    devtool: 'eval',
     devServer: {
         open: true,
-        devTool: 'eval-source-map',
         host: 'localhost',
     },
     plugins: [
@@ -36,6 +36,10 @@ const config = {
             {
                 test: /\.(js|jsx)$/i,
                 loader: 'babel-loader',
+            },
+            {
+                test: /\.styl$/,
+                use: [stylesHandler, 'css-loader', 'stylus-loader']
             },
             {
                 test: /\.css$/i,
