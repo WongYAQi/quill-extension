@@ -2,8 +2,7 @@ import extend from 'extend';
 import Quill from 'quill'
 const SnowTheme = Quill.import('themes/snow')
 const icons = Quill.import('ui/icons')
-
-import TinyMCEToolbar from '../modules/toolbar'
+const Picker = Quill.import('ui/picker')
 
 import '../assets/tinymce.styl'
 
@@ -17,9 +16,7 @@ const MENU_CONFIG = [
 
 ]
 
-Quill.register({
-  'modules/toolbar': TinyMCEToolbar
-}, true)
+
 
 class TinyMceTooltip {
 
@@ -46,10 +43,9 @@ class TinyMceTheme extends SnowTheme {
   }
 
   extendToolbar(toolbar) {
-    console.log(1)
-    toolbar.container.classList.add('ql-tinymce');
-    this.buildButtons(toolbar.container.querySelectorAll('button'), icons);
-    this.buildPickers(toolbar.container.querySelectorAll('select'), icons);
+    super.extendToolbar(toolbar)
+    toolbar.container.classList.remove('ql-snow');
+    toolbar.container.classList.add('ql-tinymce')
   }
 }
 TinyMceTheme.DEFAULTS = extend(true, {}, SnowTheme.DEFAULTS, {
@@ -77,6 +73,18 @@ TinyMceTheme.DEFAULTS = extend(true, {}, SnowTheme.DEFAULTS, {
     },
   },
 });
+
+function fillSelect(select, values, defaultValue = false) {
+  values.forEach(value => {
+    const option = document.createElement('option');
+    if (value === defaultValue) {
+      option.setAttribute('selected', 'selected');
+    } else {
+      option.setAttribute('value', value);
+    }
+    select.appendChild(option);
+  });
+}
 
 export {
   TinyMceTheme
