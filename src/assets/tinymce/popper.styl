@@ -1,0 +1,21 @@
+.ql-tinymce.ql-tinymce-popper
+  position: absolute
+  top: 0
+  left: 0
+  display: none
+  border: 1px solid #ccc
+  background-color: backgroundColor
+  &.is-active
+    display: block
+  .ql-group
+    display: block
+    border-bottom: 1px solid #ccc
+    &:nth-last-child(1)
+      border-bottom: none
+    span[class^=ql-menu]
+      display: block
+      width: 100px
+      height: 24px
+      line-height: 24px
+      &:hover
+        background-color: activeBgColor

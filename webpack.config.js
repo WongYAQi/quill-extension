@@ -18,10 +18,11 @@ const config = {
     output: {
         path: path.resolve(__dirname, 'dist'),
     },
-    devtool: 'eval',
+    devtool: 'source-map',
     devServer: {
         open: true,
         host: 'localhost',
+        port: 8180
     },
     plugins: [
         new HtmlWebpackPlugin({
