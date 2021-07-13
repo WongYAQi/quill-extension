@@ -74,7 +74,7 @@ class TinyMceTheme extends SnowTheme {
     this.bindIcons(menu.container.querySelectorAll('.ql-menu span'), Icons)
     this.bindHandlers(menu.container.querySelectorAll('.ql-menu span'), Handlers)
     this.bindKeyboards(menu.container.querySelectorAll('.ql-menu span'), Keyboards)
-    this.buildPopper(menu.container.querySelectorAll('.ql-menu span[class^=ql-menu-]'))
+    this.buildPopper(menu.container.querySelectorAll('.ql-menu > span[class^=ql-menu-]'))
   }
   extendToolbar(toolbar) {
     super.extendToolbar(toolbar)

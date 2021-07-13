@@ -1,21 +1,43 @@
 const POPPERITEM_HEIGHT = 25
+const POPPER_STACK = []
 /**
  * TODO: 创建 Popper 的时候，在外层按照层级顺序递归
  * 维护一个 stack, 检测 acitvePopper 的 menuid 是否已经存在，不存在则清除到同级，存在则没有变化
  * @param {HTMLElement} dom 
  */
-export function createPopper (dom) {
+export function createPopper (dom, parents) {
   let popper = document.createElement('div')
-  ;[...dom.children].forEach(child => popper.appendChild(child))
+
+  let format = dom.getAttribute('class') || ''
+  format = /ql-menu-(.*)\s?/.exec(format)
+  if (format) format = format[1]
+  else return
+
+  if (!(parents instanceof Array)) {
+    parents = [format]
+  } else {
+    parents.push(format)
+  }
+
+  // 在添加之前递归
+  for (let child of dom.querySelectorAll(`.ql-menu-${format} > .ql-group > span[class^=ql-menu-]`)) {
+    createPopper(child, parents.slice())
+  }
+
+  popper.stack = parents.slice()
+
+  ;[...dom.children].forEach(child => {
+    popper.appendChild(child)
+  })
   let isRootMenu = dom.parentElement.classList.contains('ql-menu')
   popper.classList.add('ql-tinymce-popper')
   popper.classList.add('ql-tinymce')
-  if (isRootMenu) popper.classList.add('is-root')
   dom.addEventListener('mouseenter', evt => {
-    popper.classList.add('is-active')
     clearOtherPopper(popper)
-    document.body.appendChild(popper)
-    calculatePosition(evt, popper, isRootMenu)
+    if (popper.children.length) {
+      activePopper(popper)
+      calculatePosition(evt, popper, isRootMenu)
+    }
   })
 }
 
@@ -24,14 +46,19 @@ export function createPopper (dom) {
  * @param {HTMLElement} activePopper 
  */
 function clearOtherPopper (activePopper) {
-  let isRootPopper = activePopper.classList.contains('is-root')
-  for(let dom of document.querySelectorAll('.ql-tinymce-popper')) {
-    if (isRootPopper && (dom)) {
-      dom.remove()
-    } else if (!isRootPopper && !dom.classList.contains('is-root')) {
-      dom.remove()
+  let stack = activePopper.stack
+  for (let i=POPPER_STACK.length - 1;i > -1;i--) {
+    let popper = POPPER_STACK[i]
+    if (!stack.join(',').includes(popper.stack.join(','))) {
+      popper.remove()
+      POPPER_STACK.splice(i, 1)
     }
   }
+}
+function activePopper (activePopper) {
+  activePopper.classList.add('is-active')
+  POPPER_STACK.push(activePopper)
+  document.body.appendChild(activePopper)
 }
 
 /**
