@@ -89,8 +89,8 @@ function addMenu (container, group, menu) {
   }
   let dom = container.querySelector(`.ql-menu-${menu.replace(/\s/g, '').toLocaleLowerCase()}`)
   if (!dom) {
-    dom = document.createElement('span')
-    dom.innerHTML = menu
+    dom = document.createElement('div')
+    dom.setAttribute('data-label', menu)
     dom.classList.add(`ql-menu-${menu.replace(/\s/g, '').toLocaleLowerCase()}`)
     group.appendChild(dom)
   }

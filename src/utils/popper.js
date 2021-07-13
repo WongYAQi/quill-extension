@@ -20,14 +20,16 @@ export function createPopper (dom, parents) {
   }
 
   // 在添加之前递归
-  for (let child of dom.querySelectorAll(`.ql-menu-${format} > .ql-group > span[class^=ql-menu-]`)) {
+  for (let child of dom.querySelectorAll(`.ql-menu-${format} > .ql-group > div[class^=ql-menu-]`)) {
     createPopper(child, parents.slice())
   }
 
   popper.stack = parents.slice()
 
   ;[...dom.children].forEach(child => {
-    popper.appendChild(child)
+    if (child.getAttribute('class').includes('ql-group')) {
+      popper.appendChild(child)
+    }
   })
   let isRootMenu = dom.parentElement.classList.contains('ql-menu')
   popper.classList.add('ql-tinymce-popper')

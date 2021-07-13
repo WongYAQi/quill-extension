@@ -71,24 +71,36 @@ class TinyMceTheme extends SnowTheme {
   extendMenu(menu) {
     menu.container.classList.add('ql-menu')
     menu.container.classList.add('ql-tinymce')
-    this.bindIcons(menu.container.querySelectorAll('.ql-menu span'), Icons)
-    this.bindHandlers(menu.container.querySelectorAll('.ql-menu span'), Handlers)
-    this.bindKeyboards(menu.container.querySelectorAll('.ql-menu span'), Keyboards)
-    this.buildPopper(menu.container.querySelectorAll('.ql-menu > span[class^=ql-menu-]'))
+    this.bindIcons(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'), Icons)
+    this.bindLabels(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'))
+    this.bindHandlers(menu.container.querySelectorAll('.ql-menu div'), Handlers)
+    this.bindKeyboards(menu.container.querySelectorAll('.ql-menu div'), Keyboards)
+    this.buildPopper(menu.container.querySelectorAll('.ql-menu > div[class^=ql-menu]'))
   }
   extendToolbar(toolbar) {
     super.extendToolbar(toolbar)
     toolbar.container.classList.remove('ql-snow');
     toolbar.container.classList.add('ql-tinymce')
   }
+  bindLabels (doms) {
+    doms.forEach(dom => {
+      let label = document.createElement('div')
+      label.classList.add('popper-item-label')
+      label.innerHTML = dom.dataset.label
+      dom.appendChild(label)
+    })
+  }
   bindIcons (doms, icons) {
     doms.forEach(dom => {
+      let iconDom = document.createElement('div')
+      iconDom.classList.add('popper-item-icon')
       let format = dom.getAttribute('class') || ''
-      format = /ql-menu-(.*?)/.exec(format)
+      format = /ql-menu-(.*)\s?/.exec(format)
       if (format) format = format[1]
       if (format && icons[format]) {
-        dom.appendChild(icons[format])
+        iconDom.innerHTML = icons[format]
       }
+      dom.appendChild(iconDom)
     })
   }
   bindHandlers (doms, handlers) {
@@ -99,16 +111,6 @@ class TinyMceTheme extends SnowTheme {
   }
   buildPopper (doms) {
     doms.forEach(createPopper)
-  }
-}
-
-/**
- * 判断 popper 是向下，还是向右
- * @param {HTMLElement} dom 
- */
-function bindDomPopper (dom) {
-  let children = dom.querySelectorAll('span[class^=ql-menu]')
-  if (children) {
   }
 }
 

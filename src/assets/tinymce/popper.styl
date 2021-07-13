@@ -5,17 +5,28 @@
   display: none
   border: 1px solid #ccc
   background-color: backgroundColor
+  border-radius: 3px
   &.is-active
     display: block
   .ql-group
     display: block
     border-bottom: 1px solid #ccc
+    padding: 3px 0
     &:nth-last-child(1)
       border-bottom: none
-    span[class^=ql-menu]
-      display: block
-      width: 100px
-      height: 24px
+    div[class^=ql-menu]
+      display: flex
+      height: auto
       line-height: 24px
+      padding: 4px 8px
       &:hover
         background-color: activeBgColor
+      .popper-item-icon
+        width: 24px
+        height: 24px
+        display: flex
+      .popper-item-label
+        flex: 1
+  svg
+    width: 24px
+    height: 24px
