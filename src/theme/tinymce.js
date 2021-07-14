@@ -20,17 +20,26 @@ const TOOLBAR_CONFIG = [
   ['clean'],
 ];
 const MENU_CONFIG = [
+  ['File_New Document'],
   ['File_Preview'],
-  ['File_Setting'],
-  // 上面两个表示所属同一个一级菜单 File, 但是是不同的分组
-  ['Format_Formats', 'Format_Font sizes'],
-  // 上面表示 Formats 和 Font Size 是所属 Format ，并且是同一组的成员
-  // 二级标签定义完了，再去定义三级标签
-  [ // 这里表示 Bold 和 Italic, Underline 是一组的，但是如何表示 Formats 和其他内容是一组的呢？在前方定义二级菜单
-    'Format_Formats_Bold',
-    'Format_Formats_Italic',
-    'Format_Formats_Underline'
-  ]
+  ['File_Export', 'File_Print'],
+  ['File_Export_Pdf'],
+  ['Edit_Undo', 'Edit_Redo'],
+  ['Edit_Cut', 'Edit_Copy', 'Edit_Paste', 'Edit_Paste as text'],
+  ['Edit_Select all'],
+  ['View_Preview', 'View_Fullscreen'],
+  ['View_Show comments'],
+  ['Insert_Image', 'Insert_Link', 'Insert_Media', 'Insert_Add comment', 'Insert_Code sample', 'Insert_Table'],
+  ['Format_Bold', 'Format_Italic', 'Format_Underline', 'Format_Code'],
+  ['Format_Formats', 'Format_Font sizes', 'Format_Fonts', 'Format_Blocks', 'Format_Align'],
+  ['Format_Text color', 'Format_Background color'],
+  ['Format_Clear formatting'],
+  ['Table_Table'],
+  ['Table_Cell', 'Table_Row', 'Table_Column'],
+  ['Table_Sort'],
+  ['Table_Table properties', 'Table_Delete Table'],
+  ['Comments_Add comment', 'Comments_Show comments'],
+  ['Help_Help']
 ]
 
 class TinyMceTooltip {

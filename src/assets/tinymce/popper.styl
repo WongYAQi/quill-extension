@@ -6,6 +6,7 @@
   border: 1px solid #ccc
   background-color: backgroundColor
   border-radius: 3px
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif
   &.is-active
     display: block
   .ql-group
@@ -19,14 +20,17 @@
       height: auto
       line-height: 24px
       padding: 4px 8px
+      cursor: pointer
       &:hover
         background-color: activeBgColor
       .popper-item-icon
         width: 24px
         height: 24px
         display: flex
+        justify-content: center
+        align-items: center
       .popper-item-label
         flex: 1
-  svg
-    width: 24px
-    height: 24px
+        font-size: 14px
+        font-weight: 400
+        margin-left: 8px

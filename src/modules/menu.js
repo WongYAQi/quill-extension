@@ -69,7 +69,7 @@ function addControls (container, options) {
       let menuDom = addMenu(container, parents.shift())
       target = menuDom
       while (parents.length) {
-        menuDom = addMenu(container, groupDom, parents.shift())
+        menuDom = addMenu(target, groupDom, parents.shift())
         if (parents.length) target = menuDom
       }
     })
