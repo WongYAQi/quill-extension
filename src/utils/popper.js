@@ -37,7 +37,7 @@ export function createPopper (dom, parents) {
   dom.addEventListener('mouseenter', evt => {
     clearOtherPopper(popper)
     if (popper.children.length) {
-      activePopper(popper)
+      activePopper(dom, popper)
       calculatePosition(evt, popper, isRootMenu)
     }
   })
@@ -47,18 +47,23 @@ export function createPopper (dom, parents) {
  * 
  * @param {HTMLElement} activePopper 
  */
-function clearOtherPopper (activePopper) {
-  let stack = activePopper.stack
+export function clearOtherPopper (activePopper) {
+  let stack = activePopper
+    ? activePopper.stack
+    : []
   for (let i=POPPER_STACK.length - 1;i > -1;i--) {
     let popper = POPPER_STACK[i]
     if (!stack.join(',').includes(popper.stack.join(','))) {
       popper.remove()
+      popper._bindTriggerElm.classList.remove('is-active')
       POPPER_STACK.splice(i, 1)
     }
   }
 }
-function activePopper (activePopper) {
+function activePopper (dom, activePopper) {
+  dom.classList.add('is-active')
   activePopper.classList.add('is-active')
+  activePopper._bindTriggerElm = dom
   POPPER_STACK.push(activePopper)
   document.body.appendChild(activePopper)
 }

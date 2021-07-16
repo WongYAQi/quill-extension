@@ -7,7 +7,7 @@ import Menu from '../modules/menu'
 import Icons from '../core/icon'
 import Handlers from '../core/handler'
 import Keyboards from '../core/keyboard'
-import { createPopper } from '../utils/popper'
+import { createPopper, clearOtherPopper } from '../utils/popper'
 
 import '../assets/tinymce.styl'
 
@@ -82,7 +82,7 @@ class TinyMceTheme extends SnowTheme {
     menu.container.classList.add('ql-tinymce')
     this.bindIcons(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'), Icons)
     this.bindLabels(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'))
-    this.bindHandlers(menu.container.querySelectorAll('.ql-menu div'), Handlers)
+    this.bindHandlers(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'), Handlers)
     this.bindKeyboards(menu.container.querySelectorAll('.ql-menu div'), Keyboards)
     this.buildPopper(menu.container.querySelectorAll('.ql-menu > div[class^=ql-menu]'))
   }
@@ -113,13 +113,25 @@ class TinyMceTheme extends SnowTheme {
     })
   }
   bindHandlers (doms, handlers) {
-
+    doms.forEach(dom => {
+      let format = dom.getAttribute('class') || ''
+      format = /ql-menu-(.*)\s?/.exec(format)
+      if (format) format = format[1]
+      if (format && handlers[format]) {
+        dom.addEventListener('click', evt => {
+          handlers[format](this.quill)
+        })
+      }
+    })
   }
   bindKeyboards (doms, handlers) {
 
   }
   buildPopper (doms) {
     doms.forEach(createPopper)
+    document.addEventListener('click', evt => {
+      clearOtherPopper()
+    })
   }
 }
 
