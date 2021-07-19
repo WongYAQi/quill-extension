@@ -4,10 +4,9 @@ const SnowTheme = Quill.import('themes/snow')
 const icons = Quill.import('ui/icons')
 const Picker = Quill.import('ui/picker')
 import Menu from '../modules/menu'
-import Icons from '../core/icon'
-import Handlers from '../core/handler'
-import Keyboards from '../core/keyboard'
 import { createPopper, clearOtherPopper } from '../utils/popper'
+import * as plugins from '../plugins'
+const PluginManager = require('../core/plugin')
 
 import '../assets/tinymce.styl'
 
@@ -80,10 +79,8 @@ class TinyMceTheme extends SnowTheme {
   extendMenu(menu) {
     menu.container.classList.add('ql-menu')
     menu.container.classList.add('ql-tinymce')
-    this.bindIcons(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'), Icons)
     this.bindLabels(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'))
-    this.bindHandlers(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'), Handlers)
-    this.bindKeyboards(menu.container.querySelectorAll('.ql-menu div'), Keyboards)
+    this.bindPlugins(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'))
     this.buildPopper(menu.container.querySelectorAll('.ql-menu > div[class^=ql-menu]'))
   }
   extendToolbar(toolbar) {
@@ -99,27 +96,27 @@ class TinyMceTheme extends SnowTheme {
       dom.appendChild(label)
     })
   }
-  bindIcons (doms, icons) {
-    doms.forEach(dom => {
-      let iconDom = document.createElement('div')
-      iconDom.classList.add('popper-item-icon')
-      let format = dom.getAttribute('class') || ''
-      format = /ql-menu-(.*)\s?/.exec(format)
-      if (format) format = format[1]
-      if (format && icons[format]) {
-        iconDom.innerHTML = icons[format]
-      }
-      dom.appendChild(iconDom)
-    })
-  }
-  bindHandlers (doms, handlers) {
+  /**
+   * 
+   * @param {NodeListOf<HTMLElement>} doms
+   */
+  bindPlugins (doms) {
     doms.forEach(dom => {
       let format = dom.getAttribute('class') || ''
       format = /ql-menu-(.*)\s?/.exec(format)
       if (format) format = format[1]
-      if (format && handlers[format]) {
+      if (format && PluginManager[format]) {
+        let plugin = PluginManager[format]
+
+        let icon = document.createElement('div')
+        icon.classList.add('popper-item-icon')
+        if (plugin._icon) {
+          icon.innerHTML = plugin._icon
+        }
+        dom.insertBefore(icon, dom.children[0])
+
         dom.addEventListener('click', evt => {
-          handlers[format](this.quill)
+          plugin(this.quill)
         })
       }
     })
