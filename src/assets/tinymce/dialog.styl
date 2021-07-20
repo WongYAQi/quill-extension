@@ -32,13 +32,30 @@
       position: relative;
     .ql-dialog__footer
       border-top: 1px solid #ccc
-      padding: 4px 8px
+      padding: 8px 16px
       display: flex
-      justify-content: space-around
+      justify-content: space-between
+      button
+        font-size: 14px
+        padding: 4px 16px
+        background-color: #207ab7
+        color: #fff
+        outline: none
+        border: 1px solid #207ab7
+        border-radius: 3px
+        font-weight: 700
+        line-height: 24px
+        cursor: pointer
+        &:hover
+          background-color: #1c6ca1
       .ql-dialog__start, .ql-dialog__end
         display: inline-block
     .ql-dialog__main
       flex: 1
+      padding: 16px
+      box-sizing: border-box
+      overflow: auto
+      max-height: 650px
     .ql-dialog__text
       font-size: 20px;
       font-style: normal;

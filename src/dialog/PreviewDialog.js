@@ -7,7 +7,14 @@ import Dialog from './Dialog'
  */
 export default function PreviewDialog (quill) {
   let content = document.createElement('div')
-  content.innerHTML = quill.root.innerHTML
+  content.style.width = '100%'
+  content.style.height = '100%'
+  content.style.overflow = 'auto'
+
+  let text = document.createElement('div')
+  text.innerHTML = quill.root.innerHTML
+
+  content.appendChild(text)
   let dialog = new Dialog(content, 'Preview')
   document.body.appendChild(dialog.container)
 }

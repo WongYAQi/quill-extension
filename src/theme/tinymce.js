@@ -63,7 +63,15 @@ class TinyMceTheme extends SnowTheme {
     if (options.modules.menu != null && options.modules.menu.container == null) {
       options.modules.menu.container = MENU_CONFIG
     }
+    let container = document.createElement('div')
+
     super(quill, options);
+    this.quill.boundary = container
+    container.classList.add('ql-tinymce-container')
+
+    this.quill.container.parentNode.insertBefore(container, this.quill.container)
+    container.appendChild(this.quill.container)
+
     this.quill.container.classList.remove('ql-snow');
     this.quill.container.classList.add('ql-tinymce');
   }
@@ -115,14 +123,28 @@ class TinyMceTheme extends SnowTheme {
         }
         dom.insertBefore(icon, dom.children[0])
 
+        if (plugin._keyboard) {
+          // metaKey, ctrlKey, shiftKey and altKey
+          let [key, ...modifiers] = plugin._keyboard
+          let binding = { key }
+          modifiers.forEach(k => binding[k] = true)
+          this.quill.keyboard.addBinding(
+            binding,
+            plugin
+          )
+          let keyDom = document.createElement('div')
+          keyDom.classList.add('popper-item-keyboard')
+          keyDom.innerHTML = modifiers.map(o => o[0].toUpperCase() + o.substr(1).replace('Key', '')).reduce((p, n) => {
+            return p + n + '+'
+          }, '') + key
+          dom.appendChild(keyDom)
+        }
+
         dom.addEventListener('click', evt => {
-          plugin(this.quill)
+          plugin.call(this)
         })
       }
     })
-  }
-  bindKeyboards (doms, handlers) {
-
   }
   buildPopper (doms) {
     doms.forEach(createPopper)

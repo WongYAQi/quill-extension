@@ -71,16 +71,16 @@ function createDialogFooter (dialog, fnSave) {
 
   let closeBtn = document.createElement('button')
   closeBtn.innerHTML = '关闭'
-  closeBtn.classList.add('ql-dialog__button', 'primary')
+  closeBtn.classList.add('ql-dialog__button')
   closeBtn.addEventListener('click', evt => {
     hideDialog(dialog)
   })
 
   if (fnSave) {
-    closeBtn.classList.remove('primary')
+    closeBtn.classList.add('secondary')
     let submitBtn = document.createElement('button')
     submitBtn.innerText = '保存'
-    submitBtn.classList.add('ql-dialog__button', 'primary')
+    submitBtn.classList.add('ql-dialog__button')
     end.appendChild(submitBtn)
     submitBtn.addEventListener('click', evt => {
       fnSave()
