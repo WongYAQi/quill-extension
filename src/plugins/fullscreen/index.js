@@ -6,10 +6,11 @@ const PluginManager = require('../../core/plugin')
  * @param {*} quill 
  */
 function fullscreenPlugin (range, context) {
-  console.log(this.quill)
+  this.quill.boundary.classList.toggle('fullscreen')
 }
 
 fullscreenPlugin._name = 'fullscreen'
 fullscreenPlugin._icon = FullScreenSVG
+fullscreenPlugin._check = false
 
 PluginManager.register(fullscreenPlugin)

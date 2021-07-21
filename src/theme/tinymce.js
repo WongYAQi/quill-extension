@@ -143,6 +143,8 @@ class TinyMceTheme extends SnowTheme {
         dom.addEventListener('click', evt => {
           plugin.call(this)
         })
+
+        PluginManager.attach(dom, plugin)
       }
     })
   }

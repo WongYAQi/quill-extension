@@ -76,8 +76,8 @@ function activePopper (dom, activePopper) {
 function calculatePosition (evt, popper, isRootMenu) {
   let target = evt.target
   if (!(target instanceof HTMLElement)) return
-  let len = popper.childNodes.length
-  let height = len * POPPERITEM_HEIGHT
+  let len = popper.querySelectorAll('div[class^=ql-menu]').length
+  let height = len * POPPERITEM_HEIGHT + popper.children.length * 6
   let documentOffsetHeight = document.body.offsetHeight
   let rect = target.getBoundingClientRect()
   let triggerElementPositionY = rect.top
