@@ -1,5 +1,6 @@
 import extend from 'extend';
 import Quill from 'quill'
+import '../format'
 const SnowTheme = Quill.import('themes/snow')
 const icons = Quill.import('ui/icons')
 const Picker = Quill.import('ui/picker')
@@ -16,6 +17,7 @@ const TOOLBAR_CONFIG = [
   [{ header: ['1', '2', '3', false] }],
   ['bold', 'italic', 'underline', 'link'],
   [{ list: 'ordered' }, { list: 'bullet' }],
+  [{ 'color': [] }, { 'background': [] }],
   ['clean'],
 ];
 const MENU_CONFIG = [
@@ -136,7 +138,7 @@ class TinyMceTheme extends SnowTheme {
           keyDom.classList.add('popper-item-keyboard')
           keyDom.innerHTML = modifiers.map(o => o[0].toUpperCase() + o.substr(1).replace('Key', '')).reduce((p, n) => {
             return p + n + '+'
-          }, '') + key
+          }, '') + key.toUpperCase()
           dom.appendChild(keyDom)
         }
 
