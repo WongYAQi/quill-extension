@@ -63,8 +63,9 @@ class TinyMceTheme extends SnowTheme {
       options.modules.toolbar.container = TOOLBAR_CONFIG;
     }
     if (options.modules.menu != null && options.modules.menu.container == null) {
-      options.modules.menu.container = MENU_CONFIG
+      options.modules.menu.container = generatePluginOptionsMenuConfig(MENU_CONFIG)
     }
+    console.log(options.modules.menu.container)
     let container = document.createElement('div')
 
     super(quill, options);
@@ -89,8 +90,6 @@ class TinyMceTheme extends SnowTheme {
   extendMenu(menu) {
     menu.container.classList.add('ql-menu')
     menu.container.classList.add('ql-tinymce')
-    this.bindLabels(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'))
-    this.bindPlugins(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'))
     this.buildPopper(menu.container.querySelectorAll('.ql-menu > div[class^=ql-menu]'))
   }
   extendToolbar(toolbar) {
@@ -98,64 +97,27 @@ class TinyMceTheme extends SnowTheme {
     toolbar.container.classList.remove('ql-snow');
     toolbar.container.classList.add('ql-tinymce')
   }
-  bindLabels (doms) {
-    doms.forEach(dom => {
-      let label = document.createElement('div')
-      label.classList.add('popper-item-label')
-      label.innerHTML = dom.dataset.label
-      dom.appendChild(label)
-    })
-  }
-  /**
-   * 
-   * @param {NodeListOf<HTMLElement>} doms
-   */
-  bindPlugins (doms) {
-    doms.forEach(dom => {
-      let format = dom.getAttribute('class') || ''
-      format = /ql-menu-(.*)\s?/.exec(format)
-      if (format) format = format[1]
-      if (format && PluginManager[format]) {
-        let plugin = PluginManager[format]
-
-        let icon = document.createElement('div')
-        icon.classList.add('popper-item-icon')
-        if (plugin._icon) {
-          icon.innerHTML = plugin._icon
-        }
-        dom.insertBefore(icon, dom.children[0])
-
-        if (plugin._keyboard) {
-          // metaKey, ctrlKey, shiftKey and altKey
-          let [key, ...modifiers] = plugin._keyboard
-          let binding = { key }
-          modifiers.forEach(k => binding[k] = true)
-          this.quill.keyboard.addBinding(
-            binding,
-            plugin
-          )
-          let keyDom = document.createElement('div')
-          keyDom.classList.add('popper-item-keyboard')
-          keyDom.innerHTML = modifiers.map(o => o[0].toUpperCase() + o.substr(1).replace('Key', '')).reduce((p, n) => {
-            return p + n + '+'
-          }, '') + key.toUpperCase()
-          dom.appendChild(keyDom)
-        }
-
-        dom.addEventListener('click', evt => {
-          plugin.call(this)
-        })
-
-        PluginManager.attach(dom, plugin)
-      }
-    })
-  }
   buildPopper (doms) {
     doms.forEach(createPopper)
     document.addEventListener('click', evt => {
       clearOtherPopper()
     })
   }
+}
+
+function generatePluginOptionsMenuConfig (configs) {
+  let menus = configs.slice()
+  configs.forEach(groups => {
+    groups.forEach(menu => {
+      let name = menu.replace(/.*_/, '')
+      name = name.replace(/\s/g, '').toLowerCase()
+      if (PluginManager[name] && PluginManager[name]._options) {
+        let newOptionConfigs = PluginManager[name]._options.map(o => `${menu}_[${name}]${o}`)
+        menus.push(newOptionConfigs)
+      }
+    })
+  })
+  return menus
 }
 
 TinyMceTheme.DEFAULTS = extend(true, {}, SnowTheme.DEFAULTS, {

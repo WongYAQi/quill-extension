@@ -1,6 +1,8 @@
 import Quill from 'quill'
+import { css } from '../utils'
 const Module = Quill.import('core/module')
-
+const PluginManager = require('../core/plugin')
+const CheckSVG = require('../assets/icons/check.svg')
 
 /**
  * label中用 _ 区分多级级联，icon 显示为前方的图标，keyboard 关键字， disabled 禁用状态
@@ -32,6 +34,7 @@ const Module = Quill.import('core/module')
 class TinyMceMenu extends Module {
   constructor (quill, options) {
     super(quill, options)
+    this.controls = []
     // 在 Menu 的时候，创建提前于 toolbar 之前
     if (Array.isArray(this.options.container)) {
       let container = document.createElement('div')
@@ -47,11 +50,109 @@ class TinyMceMenu extends Module {
     if (!(this.container instanceof HTMLElement)) {
       console.error('TinyMceMenu Module 必须通过数组参数引入的方式')
     }
+    console.log(this.container)
+    Array.from(this.container.querySelectorAll('div[class^=ql-menu]')).forEach(dom => {
+      this.attach(dom)
+    })
+    this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
+      if (type === Quill.events.SELECTION_CHANGE) {
+        this.update(range);
+      }
+    });
+    this.quill.on(Quill.events.SCROLL_OPTIMIZE, () => {
+      const [range] = this.quill.selection.getRange(); // quill.getSelection triggers update
+      this.update(range);
+    });
+  }
+  /**
+   * 将这里生成的菜单和PluginManager 中的内容互相绑定
+   * @param {HTMLElement } dom
+   */
+  attach (dom) {
+
+    let label = document.createElement('div')
+    label.classList.add('popper-item-label')
+    label.innerHTML = dom.dataset.label
+    dom.appendChild(label)
+
+    let format = dom.getAttribute('class') || ''
+    format = /ql-menu-(.*)\s?/.exec(format)
+    if (format) format = format[1]
+    if (format && PluginManager[format]) {
+      let plugin = PluginManager[format]
+
+      let icon = document.createElement('div')
+      icon.classList.add('popper-item-icon')
+      if (plugin._icon) {
+        icon.innerHTML = plugin._icon
+      }
+      dom.insertBefore(icon, dom.children[0])
+
+      if (plugin._keyboard) {
+        // metaKey, ctrlKey, shiftKey and altKey
+        let [key, ...modifiers] = plugin._keyboard
+        let binding = { key }
+        modifiers.forEach(k => binding[k] = true)
+        this.quill.keyboard.addBinding(
+          binding,
+          plugin
+        )
+        let keyDom = document.createElement('div')
+        keyDom.classList.add('popper-item-keyboard')
+        keyDom.innerHTML = modifiers.map(o => o[0].toUpperCase() + o.substr(1).replace('Key', '')).reduce((p, n) => {
+          return p + n + '+'
+        }, '') + key.toUpperCase()
+        dom.appendChild(keyDom)
+      }
+
+      if (typeof plugin._check === 'boolean') {
+        let checkDom = document.createElement('div')
+        checkDom.classList.add('popper-item-check')
+        checkDom.innerHTML = CheckSVG
+        dom.appendChild(checkDom)
+      }
+
+      dom.addEventListener('click', evt => {
+        plugin.call(this, evt)
+        if (typeof plugin._check === 'boolean') plugin._check = !plugin._check
+        this.update(null, plugin)
+      })
+
+      this.controls.push([dom, plugin])
+    } else if (dom.getAttribute('data-plugin')) {
+      // 不存在当前label对应的plugin，但是存在data-plugin，说明是通过 options 生成的内容
+      let checkDom = document.createElement('div')
+      checkDom.classList.add('popper-item-check')
+      checkDom.innerHTML = CheckSVG
+      dom.appendChild(checkDom)
+    }
 
   }
-}
-function attach () {
-
+  /**
+   * 每当鼠标定位或者其他事情，导致 document 的 editor change 或者 scroll_optimize 事件时，检测更新状态，是否显示 check
+   * 有一些内容并不是format，但是也具有 checkbox 
+   * @param {*} range 
+   * @param {*} plugin 如果存在第二个参数，说明是自定义的只有通过点击事件触发的更新，比如 Preview
+   */
+  update (range, plugin) {
+    const formats = range == null ? {} : this.quill.getFormat(range)
+    const fn = (plugin, dom, value) => {
+      if (typeof plugin._check === 'boolean') {
+        let checkDom = dom.querySelector('.popper-item-check')
+        if (checkDom) {
+          css(checkDom, { opacity: value ? '1' : '0' })
+        }
+      }
+    }
+    if (plugin) {
+      let item = this.controls.find(o => o[1] === plugin)
+      if (item) fn(plugin, item[0], plugin._check)
+    } else {
+      this.controls.forEach(([dom, plugin]) => {
+        fn(plugin, dom, formats[plugin._blotName])
+      })
+    }
+  }
 }
 /**
  * 这里只是添加元素，并没有绑定事件、绑定图标等内容
@@ -87,11 +188,17 @@ function addMenu (container, group, menu) {
     menu = group
     group = container
   }
-  let dom = container.querySelector(`.ql-menu-${menu.replace(/\s/g, '').toLocaleLowerCase()}`)
+  let parentPlugin = menu.startsWith('[')
+    ? /\[(.*)\]/.exec(menu)[1]
+    : ''
+  menu = menu.replace(/\[.*\]/, '')
+  let selector = `.ql-menu-${menu.replace(/\s/g, '').toLocaleLowerCase()}`
+  let dom = container.querySelector(selector)
   if (!dom) {
     dom = document.createElement('div')
     dom.setAttribute('data-label', menu)
-    dom.classList.add(`ql-menu-${menu.replace(/\s/g, '').toLocaleLowerCase()}`)
+    if (parentPlugin) dom.setAttribute('data-plugin', parentPlugin)
+    dom.classList.add(selector.substring(1))
     group.appendChild(dom)
   }
   return dom
