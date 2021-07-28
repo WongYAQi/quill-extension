@@ -7,7 +7,6 @@ const Picker = Quill.import('ui/picker')
 import Menu from '../modules/menu'
 import { createPopper, clearOtherPopper } from '../utils/popper'
 import * as plugins from '../plugins'
-const PluginManager = require('../core/plugin')
 
 import '../assets/tinymce.styl'
 
@@ -18,6 +17,7 @@ const TOOLBAR_CONFIG = [
   ['bold', 'italic', 'underline', 'link'],
   [{ list: 'ordered' }, { list: 'bullet' }],
   [{ 'color': [] }, { 'background': [] }],
+  [{ align: [] }],
   ['clean'],
 ];
 const MENU_CONFIG = [
@@ -63,7 +63,7 @@ class TinyMceTheme extends SnowTheme {
       options.modules.toolbar.container = TOOLBAR_CONFIG;
     }
     if (options.modules.menu != null && options.modules.menu.container == null) {
-      options.modules.menu.container = generatePluginOptionsMenuConfig(MENU_CONFIG)
+      options.modules.menu.container = MENU_CONFIG
     }
     console.log(options.modules.menu.container)
     let container = document.createElement('div')
@@ -105,20 +105,6 @@ class TinyMceTheme extends SnowTheme {
   }
 }
 
-function generatePluginOptionsMenuConfig (configs) {
-  let menus = configs.slice()
-  configs.forEach(groups => {
-    groups.forEach(menu => {
-      let name = menu.replace(/.*_/, '')
-      name = name.replace(/\s/g, '').toLowerCase()
-      if (PluginManager[name] && PluginManager[name]._options) {
-        let newOptionConfigs = PluginManager[name]._options.map(o => `${menu}_[${name}]${o}`)
-        menus.push(newOptionConfigs)
-      }
-    })
-  })
-  return menus
-}
 
 TinyMceTheme.DEFAULTS = extend(true, {}, SnowTheme.DEFAULTS, {
   modules: {

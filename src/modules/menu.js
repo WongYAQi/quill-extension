@@ -1,5 +1,6 @@
 import Quill from 'quill'
 import { css } from '../utils'
+import { createPopper, clearOtherPopper } from '../utils/popper'
 const Module = Quill.import('core/module')
 const PluginManager = require('../core/plugin')
 const CheckSVG = require('../assets/icons/check.svg')
@@ -37,6 +38,7 @@ class TinyMceMenu extends Module {
     this.controls = []
     // 在 Menu 的时候，创建提前于 toolbar 之前
     if (Array.isArray(this.options.container)) {
+      this.options.container = generatePluginOptionsMenuConfig(this.options.container)
       let container = document.createElement('div')
       addControls(container, this.options.container)
       /** @type { HTMLElement } */
@@ -66,6 +68,8 @@ class TinyMceMenu extends Module {
   }
   /**
    * 将这里生成的菜单和PluginManager 中的内容互相绑定
+   * 按顺序生成 icon, label, keyboard, check
+   * 如何区分主menu菜单项，和通过options生成的菜单项
    * @param {HTMLElement } dom
    */
   attach (dom) {
@@ -78,55 +82,69 @@ class TinyMceMenu extends Module {
     let format = dom.getAttribute('class') || ''
     format = /ql-menu-(.*)\s?/.exec(format)
     if (format) format = format[1]
-    if (format && PluginManager[format]) {
-      let plugin = PluginManager[format]
+    if (!format) return
+    let plugin = PluginManager[format]
+    if (!plugin) plugin = PluginManager[dom.getAttribute('data-plugin')]
+    if (!plugin) return
 
-      let icon = document.createElement('div')
-      icon.classList.add('popper-item-icon')
-      if (plugin._icon) {
-        icon.innerHTML = plugin._icon
-      }
+    // 对于icon区域，主menu菜单默认存在icon区域，options菜单区域默认不存在icon
+    let icon = document.createElement('div')
+    icon.classList.add('popper-item-icon')
+    if (plugin._icon instanceof Object) {
+      icon.innerHTML = plugin._icon[format]
+    } else if (plugin._icon) {
+      icon.innerHTML = plugin._icon
+    }
+    if (plugin._name === format) {
       dom.insertBefore(icon, dom.children[0])
+    } else if (plugin._icon && plugin._icon[format]) {
+      dom.insertBefore(icon, dom.children[0])
+    }
 
-      if (plugin._keyboard) {
-        // metaKey, ctrlKey, shiftKey and altKey
-        let [key, ...modifiers] = plugin._keyboard
-        let binding = { key }
-        modifiers.forEach(k => binding[k] = true)
-        this.quill.keyboard.addBinding(
-          binding,
-          plugin
-        )
-        let keyDom = document.createElement('div')
-        keyDom.classList.add('popper-item-keyboard')
-        keyDom.innerHTML = modifiers.map(o => o[0].toUpperCase() + o.substr(1).replace('Key', '')).reduce((p, n) => {
-          return p + n + '+'
-        }, '') + key.toUpperCase()
-        dom.appendChild(keyDom)
-      }
+    if (plugin._name === format && plugin._keyboard) {
+      // metaKey, ctrlKey, shiftKey and altKey
+      let [key, ...modifiers] = plugin._keyboard
+      let binding = { key }
+      modifiers.forEach(k => binding[k] = true)
+      this.quill.keyboard.addBinding(
+        binding,
+        plugin
+      )
+      let keyDom = document.createElement('div')
+      keyDom.classList.add('popper-item-keyboard')
+      keyDom.innerHTML = modifiers.map(o => o[0].toUpperCase() + o.substr(1).replace('Key', '')).reduce((p, n) => {
+        return p + n + '+'
+      }, '') + key.toUpperCase()
+      dom.appendChild(keyDom)
+    }
 
-      if (typeof plugin._check === 'boolean') {
-        let checkDom = document.createElement('div')
-        checkDom.classList.add('popper-item-check')
-        checkDom.innerHTML = CheckSVG
-        dom.appendChild(checkDom)
-      }
-
-      dom.addEventListener('click', evt => {
-        plugin.call(this, evt)
-        if (typeof plugin._check === 'boolean') plugin._check = !plugin._check
-        this.update(null, plugin)
-      })
-
-      this.controls.push([dom, plugin])
-    } else if (dom.getAttribute('data-plugin')) {
-      // 不存在当前label对应的plugin，但是存在data-plugin，说明是通过 options 生成的内容
+    // 只有 具备多个值的 plugin 生成的 item 项才具有默认的 check 区域
+    if ((plugin._name !== format) ||
+      (typeof plugin._check === 'boolean')
+    ) {
       let checkDom = document.createElement('div')
       checkDom.classList.add('popper-item-check')
       checkDom.innerHTML = CheckSVG
       dom.appendChild(checkDom)
     }
 
+    // 为主 menu 项（对应的是通过 options生成出来的非主menu项）
+    if (plugin._name === format) {
+      this.controls.push([dom, plugin])
+
+      dom.addEventListener('click', evt => {
+        plugin.call(this)
+        if (typeof plugin._check === 'boolean') plugin._check = !plugin._check
+        this.update(null, plugin)
+      })
+    } else if (plugin._options) {
+      dom.addEventListener('click', evt => {
+        evt.stopPropagation()
+        plugin.call(this, format)
+        this.update(null, plugin, format)
+        clearOtherPopper()
+      })
+    }
   }
   /**
    * 每当鼠标定位或者其他事情，导致 document 的 editor change 或者 scroll_optimize 事件时，检测更新状态，是否显示 check
@@ -134,21 +152,31 @@ class TinyMceMenu extends Module {
    * @param {*} range 
    * @param {*} plugin 如果存在第二个参数，说明是自定义的只有通过点击事件触发的更新，比如 Preview
    */
-  update (range, plugin) {
+  update (range, plugin, value) {
     const formats = range == null ? {} : this.quill.getFormat(range)
     const fn = (plugin, dom, value) => {
       if (typeof plugin._check === 'boolean') {
-        let checkDom = dom.querySelector('.popper-item-check')
-        if (checkDom) {
-          css(checkDom, { opacity: value ? '1' : '0' })
+      } else if (plugin._options) {
+        for(let checkDom of dom.querySelectorAll('.popper-item-check')) {
+          css(checkDom, { opacity: '0' })
         }
+        dom = dom.querySelector('.ql-menu-' + value)
+        if (!dom) return
+      } else {
+        return
+      }
+      
+      let checkDom = dom.querySelector('.popper-item-check')
+      if (checkDom) {
+        css(checkDom, { opacity: value ? '1' : '0' })
       }
     }
     if (plugin) {
       let item = this.controls.find(o => o[1] === plugin)
-      if (item) fn(plugin, item[0], plugin._check)
+      if (item) fn(plugin, item[0], plugin._check || value)
     } else {
       this.controls.forEach(([dom, plugin]) => {
+        // 这里的 controls 可能有主menu，也有携带options的主menu
         fn(plugin, dom, formats[plugin._blotName])
       })
     }
@@ -202,6 +230,21 @@ function addMenu (container, group, menu) {
     group.appendChild(dom)
   }
   return dom
+}
+
+function generatePluginOptionsMenuConfig (configs) {
+  let menus = configs.slice()
+  configs.forEach(groups => {
+    groups.forEach(menu => {
+      let name = menu.replace(/.*_/, '')
+      name = name.replace(/\s/g, '').toLowerCase()
+      if (PluginManager[name] && PluginManager[name]._options) {
+        let newOptionConfigs = PluginManager[name]._options.map(o => `${menu}_[${name}]${o}`)
+        menus.push(newOptionConfigs)
+      }
+    })
+  })
+  return menus
 }
 
 export default TinyMceMenu

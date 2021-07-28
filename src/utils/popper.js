@@ -65,7 +65,7 @@ function activePopper (dom, activePopper) {
   activePopper.classList.add('is-active')
   activePopper._bindTriggerElm = dom
   POPPER_STACK.push(activePopper)
-  document.body.appendChild(activePopper)
+  dom.appendChild(activePopper)
 }
 
 /**
