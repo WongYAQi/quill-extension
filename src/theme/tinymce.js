@@ -32,7 +32,13 @@ const MENU_CONFIG = [
   ['View_Show comments'],
   ['Insert_Image', 'Insert_Link', 'Insert_Media', 'Insert_Add comment', 'Insert_Code sample', 'Insert_Table'],
   ['Format_Bold', 'Format_Italic', 'Format_Underline', 'Format_Code'],
-  ['Format_Formats', 'Format_Font sizes', 'Format_Fonts', 'Format_Blocks', 'Format_Align'],
+  [
+    // 'Format_Formats',
+    'Format_Font sizes',
+    // 'Format_Fonts',
+    // 'Format_Blocks',
+    'Format_Align'
+  ],
   ['Format_Text color', 'Format_Background color'],
   ['Format_Clear formatting'],
   ['Table_Table'],

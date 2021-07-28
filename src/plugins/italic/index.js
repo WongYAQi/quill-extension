@@ -1,7 +1,8 @@
+import Quill from 'quill'
 import ItalicSVG from './italic.svg'
 const PluginManager = require('../../core/plugin')
 function italicPlugin () {
-  // do nothing
+  this.quill.format('italic', true, Quill.sources.USER)
 }
 italicPlugin._name = 'italic'
 italicPlugin._icon = ItalicSVG

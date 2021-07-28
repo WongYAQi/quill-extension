@@ -1,8 +1,9 @@
+import Quill from 'quill'
 import UnderlineSVG from './underline.svg'
 const PluginManager = require('../../core/plugin')
 
 function underlinePlugin () {
-  // do nothing
+  this.quill.format('underline', true, Quill.sources.USER)
 }
 underlinePlugin._name = 'underline'
 underlinePlugin._icon = UnderlineSVG

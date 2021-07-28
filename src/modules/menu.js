@@ -4,6 +4,7 @@ import { createPopper, clearOtherPopper } from '../utils/popper'
 const Module = Quill.import('core/module')
 const PluginManager = require('../core/plugin')
 const CheckSVG = require('../assets/icons/check.svg')
+const ArrowRightSVG = require('../assets/icons/arrow-right.svg')
 
 /**
  * label中用 _ 区分多级级联，icon 显示为前方的图标，keyboard 关键字， disabled 禁用状态
@@ -128,23 +129,31 @@ class TinyMceMenu extends Module {
       dom.appendChild(checkDom)
     }
 
+    if (plugin._name === format && plugin._options) {
+      let icon = document.createElement('div')
+      icon.classList.add('popper-item-more')
+      icon.innerHTML = ArrowRightSVG
+      dom.appendChild(icon)
+    }
+
     // 为主 menu 项（对应的是通过 options生成出来的非主menu项）
     if (plugin._name === format) {
-      this.controls.push([dom, plugin])
-
       dom.addEventListener('click', evt => {
+        if (plugin._options) evt.stopPropagation()
         plugin.call(this)
         if (typeof plugin._check === 'boolean') plugin._check = !plugin._check
-        this.update(null, plugin)
+        this.update(null, plugin, { [plugin._blotName]: plugin._check })
       })
     } else if (plugin._options) {
       dom.addEventListener('click', evt => {
         evt.stopPropagation()
         plugin.call(this, format)
-        this.update(null, plugin, format)
+        this.update(null, plugin, { [plugin._blotName]: format})
         clearOtherPopper()
       })
     }
+
+    this.controls.push([dom, plugin])
   }
   /**
    * 每当鼠标定位或者其他事情，导致 document 的 editor change 或者 scroll_optimize 事件时，检测更新状态，是否显示 check
@@ -152,34 +161,23 @@ class TinyMceMenu extends Module {
    * @param {*} range 
    * @param {*} plugin 如果存在第二个参数，说明是自定义的只有通过点击事件触发的更新，比如 Preview
    */
-  update (range, plugin, value) {
-    const formats = range == null ? {} : this.quill.getFormat(range)
+  update (range, plugin, formats = {}) {
+    formats = range == null ? formats : this.quill.getFormat(range)
     const fn = (plugin, dom, value) => {
-      if (typeof plugin._check === 'boolean') {
-      } else if (plugin._options) {
-        for(let checkDom of dom.querySelectorAll('.popper-item-check')) {
-          css(checkDom, { opacity: '0' })
-        }
-        dom = dom.querySelector('.ql-menu-' + value)
-        if (!dom) return
+      if (typeof value === 'boolean') {
+        value = value
       } else {
-        return
+        value = dom.classList.contains('ql-menu-' + value)
       }
-      
       let checkDom = dom.querySelector('.popper-item-check')
       if (checkDom) {
         css(checkDom, { opacity: value ? '1' : '0' })
       }
     }
-    if (plugin) {
-      let item = this.controls.find(o => o[1] === plugin)
-      if (item) fn(plugin, item[0], plugin._check || value)
-    } else {
-      this.controls.forEach(([dom, plugin]) => {
-        // 这里的 controls 可能有主menu，也有携带options的主menu
-        fn(plugin, dom, formats[plugin._blotName])
-      })
-    }
+    this.controls.forEach(([dom, p]) => {
+      if (plugin && plugin !== p) return
+      fn(p, dom, formats[p._blotName])
+    })
   }
 }
 /**
