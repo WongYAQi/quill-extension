@@ -7,6 +7,7 @@ const Picker = Quill.import('ui/picker')
 import Menu from '../modules/menu'
 import { createPopper, clearOtherPopper } from '../utils/popper'
 import * as plugins from '../plugins'
+const { MenuPopper, PopperManager } = require('../core/popper')
 
 import '../assets/tinymce.styl'
 
@@ -96,7 +97,7 @@ class TinyMceTheme extends SnowTheme {
   extendMenu(menu) {
     menu.container.classList.add('ql-menu')
     menu.container.classList.add('ql-tinymce')
-    this.buildPopper(menu.container.querySelectorAll('.ql-menu > div[class^=ql-menu]'))
+    this.buildPopper(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'))
   }
   extendToolbar(toolbar) {
     super.extendToolbar(toolbar)
@@ -104,7 +105,9 @@ class TinyMceTheme extends SnowTheme {
     toolbar.container.classList.add('ql-tinymce')
   }
   buildPopper (doms) {
-    doms.forEach(createPopper)
+    doms.forEach(dom => {
+      console.log(new MenuPopper(dom))
+    })
     document.addEventListener('click', evt => {
       clearOtherPopper()
     })

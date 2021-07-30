@@ -39,7 +39,7 @@ class TinyMceMenu extends Module {
     this.controls = []
     // 在 Menu 的时候，创建提前于 toolbar 之前
     if (Array.isArray(this.options.container)) {
-      this.options.container = generatePluginOptionsMenuConfig(this.options.container)
+      this.options.container = this.options.container
       let container = document.createElement('div')
       addControls(container, this.options.container)
       /** @type { HTMLElement } */
@@ -230,19 +230,19 @@ function addMenu (container, group, menu) {
   return dom
 }
 
-function generatePluginOptionsMenuConfig (configs) {
-  let menus = configs.slice()
-  configs.forEach(groups => {
-    groups.forEach(menu => {
-      let name = menu.replace(/.*_/, '')
-      name = name.replace(/\s/g, '').toLowerCase()
-      if (PluginManager[name] && PluginManager[name]._options) {
-        let newOptionConfigs = PluginManager[name]._options.map(o => `${menu}_[${name}]${o}`)
-        menus.push(newOptionConfigs)
-      }
-    })
-  })
-  return menus
-}
+// function generatePluginOptionsMenuConfig (configs) {
+//   let menus = configs.slice()
+//   configs.forEach(groups => {
+//     groups.forEach(menu => {
+//       let name = menu.replace(/.*_/, '')
+//       name = name.replace(/\s/g, '').toLowerCase()
+//       if (PluginManager[name] && PluginManager[name]._options) {
+//         let newOptionConfigs = PluginManager[name]._options.map(o => `${menu}_[${name}]${o}`)
+//         menus.push(newOptionConfigs)
+//       }
+//     })
+//   })
+//   return menus
+// }
 
 export default TinyMceMenu
