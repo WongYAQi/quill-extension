@@ -1,4 +1,6 @@
 const POPPERITEM_HEIGHT = 25
+const CheckSVG = require('../assets/icons/check.svg')
+const { appendPopperDom } = require('../utils/popper')
 
 /**
  * Popper机制
@@ -145,10 +147,35 @@ class ColorPopper extends Popper {
  * Menu 和 Options 的区别在于，Menu是通过Dom生成的，而 Options是根据Plugin中存储的 options 数据来动态生成的
  */
 class OptionsPopper extends Popper {
+  constructor (ref, plugin) {
+    super(ref, [])
+    plugin._options.forEach(opt => {
+      let dom = document.createElement('div')
 
+      if (plugin._icon && plugin._icon[opt]) {
+        appendPopperDom(dom, ['popper-item-icon'], plugin._icon[opt])
+      }
+      dom.classList.add('ql-menu')
+      appendPopperDom(dom, ['popper-item-label'], opt)
+      appendPopperDom(dom, ['popper-item-check'], CheckSVG)
+
+      this.container.appendChild(dom)
+    })
+
+    let parentEle = ref.parentElement
+    while (parentEle) {
+      if (parentEle._popper instanceof Popper) {
+        this.parents.unshift(parentEle._popper)
+        this.align = 'right'
+      }
+      parentEle = parentEle.parentElement || parentEle.triggerElement
+    }
+
+    ref._popper = this
+  }
 }
-
 module.exports = {
   MenuPopper,
+  OptionsPopper,
   PopperManager
 }

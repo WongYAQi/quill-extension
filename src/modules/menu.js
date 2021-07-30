@@ -1,6 +1,7 @@
 import Quill from 'quill'
+import { MenuPopper, OptionsPopper } from '../core/popper'
 import { css } from '../utils'
-import { createPopper, clearOtherPopper } from '../utils/popper'
+import { appendPopperDom, clearOtherPopper } from '../utils/popper'
 const Module = Quill.import('core/module')
 const PluginManager = require('../core/plugin')
 const CheckSVG = require('../assets/icons/check.svg')
@@ -74,11 +75,9 @@ class TinyMceMenu extends Module {
    * @param {HTMLElement } dom
    */
   attach (dom) {
+    let popper = new MenuPopper(dom)
 
-    let label = document.createElement('div')
-    label.classList.add('popper-item-label')
-    label.innerHTML = dom.dataset.label
-    dom.appendChild(label)
+    appendPopperDom(dom, ['popper-item-label'], dom.dataset.label)
 
     let format = dom.getAttribute('class') || ''
     format = /ql-menu-(.*)\s?/.exec(format)
@@ -111,29 +110,23 @@ class TinyMceMenu extends Module {
         binding,
         plugin
       )
-      let keyDom = document.createElement('div')
-      keyDom.classList.add('popper-item-keyboard')
-      keyDom.innerHTML = modifiers.map(o => o[0].toUpperCase() + o.substr(1).replace('Key', '')).reduce((p, n) => {
+
+      let keylabel = modifiers.map(o => o[0].toUpperCase() + o.substr(1).replace('Key', '')).reduce((p, n) => {
         return p + n + '+'
       }, '') + key.toUpperCase()
-      dom.appendChild(keyDom)
+
+      appendPopperDom(dom, ['popper-item-keyboard'], keylabel)
     }
 
     // 只有 具备多个值的 plugin 生成的 item 项才具有默认的 check 区域
     if ((plugin._name !== format) ||
       (typeof plugin._check === 'boolean')
     ) {
-      let checkDom = document.createElement('div')
-      checkDom.classList.add('popper-item-check')
-      checkDom.innerHTML = CheckSVG
-      dom.appendChild(checkDom)
+      appendPopperDom(dom, ['popper-item-check'], CheckSVG)
     }
 
     if (plugin._name === format && plugin._options) {
-      let icon = document.createElement('div')
-      icon.classList.add('popper-item-more')
-      icon.innerHTML = ArrowRightSVG
-      dom.appendChild(icon)
+      appendPopperDom(dom, ['popper-item-more'], ArrowRightSVG)
     }
 
     // 为主 menu 项（对应的是通过 options生成出来的非主menu项）
@@ -154,6 +147,10 @@ class TinyMceMenu extends Module {
     }
 
     this.controls.push([dom, plugin])
+
+    if (plugin._options) {
+      popper = new OptionsPopper(dom, plugin)
+    }
   }
   /**
    * 每当鼠标定位或者其他事情，导致 document 的 editor change 或者 scroll_optimize 事件时，检测更新状态，是否显示 check

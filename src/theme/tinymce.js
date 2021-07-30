@@ -2,12 +2,8 @@ import extend from 'extend';
 import Quill from 'quill'
 import '../format'
 const SnowTheme = Quill.import('themes/snow')
-const icons = Quill.import('ui/icons')
-const Picker = Quill.import('ui/picker')
 import Menu from '../modules/menu'
-import { createPopper, clearOtherPopper } from '../utils/popper'
 import * as plugins from '../plugins'
-const { MenuPopper, PopperManager } = require('../core/popper')
 
 import '../assets/tinymce.styl'
 
@@ -72,7 +68,6 @@ class TinyMceTheme extends SnowTheme {
     if (options.modules.menu != null && options.modules.menu.container == null) {
       options.modules.menu.container = MENU_CONFIG
     }
-    console.log(options.modules.menu.container)
     let container = document.createElement('div')
 
     super(quill, options);
@@ -97,20 +92,11 @@ class TinyMceTheme extends SnowTheme {
   extendMenu(menu) {
     menu.container.classList.add('ql-menu')
     menu.container.classList.add('ql-tinymce')
-    this.buildPopper(menu.container.querySelectorAll('.ql-menu div[class^=ql-menu]'))
   }
   extendToolbar(toolbar) {
     super.extendToolbar(toolbar)
     toolbar.container.classList.remove('ql-snow');
     toolbar.container.classList.add('ql-tinymce')
-  }
-  buildPopper (doms) {
-    doms.forEach(dom => {
-      console.log(new MenuPopper(dom))
-    })
-    document.addEventListener('click', evt => {
-      clearOtherPopper()
-    })
   }
 }
 

@@ -96,3 +96,11 @@ function calculatePosition (evt, popper, isRootMenu) {
     popper.style.height = 'initial'
   }
 }
+
+export function appendPopperDom (dom, classlists, innerHTML) {
+  let d = document.createElement('div')
+  d.classList.add(...classlists)
+  d.innerHTML = innerHTML
+  dom.appendChild(d)
+}
+
