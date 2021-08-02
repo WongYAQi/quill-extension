@@ -1,6 +1,8 @@
 const POPPERITEM_HEIGHT = 25
 const CheckSVG = require('../assets/icons/check.svg')
-const { appendPopperDom } = require('../utils/popper')
+const { appendPopperDom, clearOtherPopper } = require('../utils/popper')
+const { css } = require('../utils')
+const ArrowRightSVG = require('../assets/icons/arrow-right.svg')
 
 /**
  * Popper机制
@@ -140,8 +142,49 @@ class MenuPopper extends Popper {
     ref._popper = this
   }
 }
-class ColorPopper extends Popper {
 
+/**
+ * 颜色类型的Popper
+ */
+class ColorPopper extends Popper {
+  constructor (ref, plugin, menu) {
+    super(ref, [])
+
+    appendPopperDom(ref, ['popper-item-more'], ArrowRightSVG)
+    let colors = [
+      ['#000000', '#e60000', '#ff9900', '#ffff00', '#008a00'],
+      ['#ffffff', '#facccc', '#ffebcc', '#ffffcc', '#cce8cc'],
+      ['#bbbbbb', '#f06666', '#ffc266', '#ffff66', '#66b966'],
+      ['#888888', '#a10000', '#b26b00', '#b2b200', '#006100']
+    ]
+    colors.forEach(group => {
+      let div = document.createElement('div')
+      div.classList.add('ql-color-group')
+      group.forEach(color => {
+        let dom = document.createElement('span')
+        dom.classList.add('ql-color-item')
+        css(dom, { backgroundColor: color })
+        div.appendChild(dom)
+      })
+      this.container.appendChild(div)
+    })
+
+    this.container.addEventListener('click', evt => {
+      plugin.call(menu, evt)
+      PopperManager.clearPopper()
+    })
+
+    let parentEle = ref.parentElement
+    while (parentEle) {
+      if (parentEle._popper instanceof Popper) {
+        this.parents.unshift(parentEle._popper)
+        this.align = 'right'
+      }
+      parentEle = parentEle.parentElement || parentEle.triggerElement
+    }
+
+    ref._popper = this
+  }
 }
 /**
  * Menu 和 Options 的区别在于，Menu是通过Dom生成的，而 Options是根据Plugin中存储的 options 数据来动态生成的
@@ -149,6 +192,7 @@ class ColorPopper extends Popper {
 class OptionsPopper extends Popper {
   constructor (ref, plugin) {
     super(ref, [])
+    appendPopperDom(ref, ['popper-item-more'], ArrowRightSVG)
     plugin._options.forEach(opt => {
       let dom = document.createElement('div')
 
@@ -176,6 +220,7 @@ class OptionsPopper extends Popper {
 }
 module.exports = {
   MenuPopper,
+  ColorPopper,
   OptionsPopper,
   PopperManager
 }

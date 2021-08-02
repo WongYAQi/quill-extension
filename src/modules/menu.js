@@ -1,5 +1,5 @@
 import Quill from 'quill'
-import { MenuPopper, OptionsPopper } from '../core/popper'
+import { MenuPopper, OptionsPopper, ColorPopper, PopperManager } from '../core/popper'
 import { css } from '../utils'
 import { appendPopperDom, clearOtherPopper } from '../utils/popper'
 const Module = Quill.import('core/module')
@@ -54,7 +54,11 @@ class TinyMceMenu extends Module {
     if (!(this.container instanceof HTMLElement)) {
       console.error('TinyMceMenu Module 必须通过数组参数引入的方式')
     }
-    console.log(this.container)
+
+    document.addEventListener('click', evt => {
+      PopperManager.clearPopper()
+    })
+
     Array.from(this.container.querySelectorAll('div[class^=ql-menu]')).forEach(dom => {
       this.attach(dom)
     })
@@ -125,31 +129,26 @@ class TinyMceMenu extends Module {
       appendPopperDom(dom, ['popper-item-check'], CheckSVG)
     }
 
-    if (plugin._name === format && plugin._options) {
-      appendPopperDom(dom, ['popper-item-more'], ArrowRightSVG)
-    }
+    this.controls.push([dom, plugin])
 
-    // 为主 menu 项（对应的是通过 options生成出来的非主menu项）
-    if (plugin._name === format) {
-      dom.addEventListener('click', evt => {
-        if (plugin._options) evt.stopPropagation()
-        plugin.call(this)
-        if (typeof plugin._check === 'boolean') plugin._check = !plugin._check
-        this.update(null, plugin, { [plugin._blotName]: plugin._check })
-      })
-    } else if (plugin._options) {
+    if (plugin._options) {
+      popper = new OptionsPopper(dom, plugin)
+
       dom.addEventListener('click', evt => {
         evt.stopPropagation()
         plugin.call(this, format)
         this.update(null, plugin, { [plugin._blotName]: format})
         clearOtherPopper()
       })
-    }
-
-    this.controls.push([dom, plugin])
-
-    if (plugin._options) {
-      popper = new OptionsPopper(dom, plugin)
+    } else if (format === 'textcolor' || format === 'backgroundcolor') {
+      popper = new ColorPopper(dom, plugin, this)
+    } else if (plugin._name === format) {
+      dom.addEventListener('click', evt => {
+        if (plugin._options) evt.stopPropagation()
+        plugin.call(this)
+        if (typeof plugin._check === 'boolean') plugin._check = !plugin._check
+        this.update(null, plugin, { [plugin._blotName]: plugin._check })
+      })
     }
   }
   /**
