@@ -151,12 +151,7 @@ class ColorPopper extends Popper {
     super(ref, [])
 
     appendPopperDom(ref, ['popper-item-more'], ArrowRightSVG)
-    let colors = [
-      ['#000000', '#e60000', '#ff9900', '#ffff00', '#008a00'],
-      ['#ffffff', '#facccc', '#ffebcc', '#ffffcc', '#cce8cc'],
-      ['#bbbbbb', '#f06666', '#ffc266', '#ffff66', '#66b966'],
-      ['#888888', '#a10000', '#b26b00', '#b2b200', '#006100']
-    ]
+    let colors = plugin._colors
     colors.forEach(group => {
       let div = document.createElement('div')
       div.classList.add('ql-color-group')
