@@ -27,7 +27,7 @@ const MENU_CONFIG = [
   ['Edit_Select all'],
   ['View_Preview', 'View_Fullscreen'],
   ['View_Show comments'],
-  ['Insert_Image', 'Insert_Link', 'Insert_Media', 'Insert_Add comment', 'Insert_Code sample', 'Insert_Table'],
+  ['Insert_Image', 'Insert_Link', 'Insert_Media', 'Insert_Add comment', 'Insert_Code sample'],
   ['Format_Bold', 'Format_Italic', 'Format_Underline', 'Format_Code'],
   [
     // 'Format_Formats',

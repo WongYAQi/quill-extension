@@ -1,7 +1,8 @@
 {
   "name": "my-webpack-project",
-  "version": "1.0.0",
-  "description": "My webpack project",
+  "version": "0.1.0",
+  "description": "Quill for Tinymce like skin",
+  "keywords": [ "Quill", "quill", "skin", "tinymce"],
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
