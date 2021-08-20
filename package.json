@@ -1,5 +1,5 @@
 {
-  "name": "my-webpack-project",
+  "name": "quill-extension",
   "version": "0.1.0",
   "description": "Quill for Tinymce like skin",
   "keywords": [ "Quill", "quill", "skin", "tinymce"],

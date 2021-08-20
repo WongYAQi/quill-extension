@@ -213,9 +213,48 @@ class OptionsPopper extends Popper {
     ref._popper = this
   }
 }
+
+/**
+ * 在表单中用到的 select 下拉框涉及的 option 弹框
+ */
+class SelectPopper extends Popper {
+  constructor (ref, options) {
+    super(ref, [])
+    // 为 this.container 添加各种元素，形成options下拉框
+    let opts = options.map(o => {
+      return this.makeItem(o)
+    })
+    let panel = new SelectPanel(opts)
+    this.container.appendChild(panel.dom)
+    this.align = 'bottom'
+  }
+  makeItem (option) {
+    let dom = document.createElement('div')
+    dom.classList.add('ql-tinymce-listbox-item')
+    return dom
+  }
+}
+
+/**
+ * 一个存在高度限制的 panel 面板
+ */
+class SelectPanel {
+  constructor (slots) {
+    this.dom = this.makeContainer()
+    slots.forEach(slot => {
+      this.dom.appendChild(slot)
+    })
+  }
+  makeContainer () {
+    let dom = document.createElement('div')
+    dom.classList.add('ql-tinymce-listbox-panel')
+    return dom
+  }
+}
 module.exports = {
   MenuPopper,
   ColorPopper,
   OptionsPopper,
-  PopperManager
+  PopperManager,
+  SelectPopper
 }
