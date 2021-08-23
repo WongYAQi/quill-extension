@@ -6,6 +6,6 @@
     "target": "es5",
     "allowJs": true,
     "moduleResolution": "Node"
-  },
-  "files": ["src/index.ts"]
+  }
+  // "files": ["src/index.ts"]
 }

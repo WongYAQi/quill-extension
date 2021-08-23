@@ -24,6 +24,9 @@ const config = {
         host: 'localhost',
         port: 8180
     },
+    resolve: {
+        extensions: ['.js', '.ts']
+    },
     plugins: [
         new HtmlWebpackPlugin({
             template: 'index.html',
@@ -34,6 +37,10 @@ const config = {
     ],
     module: {
         rules: [
+            {
+                test: /\.ts$/i,
+                loader: 'ts-loader'
+            },
             {
                 test: /\.(js|jsx)$/i,
                 loader: 'babel-loader',
