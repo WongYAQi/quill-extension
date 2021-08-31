@@ -62,6 +62,7 @@ class TinyMceMenu extends Module {
     Array.from(this.container.querySelectorAll('div[class^=ql-menu]')).forEach(dom => {
       this.attach(dom)
     })
+    console.log(this.controls)
     this.quill.on(Quill.events.EDITOR_CHANGE, (type, range) => {
       if (type === Quill.events.SELECTION_CHANGE) {
         this.update(range);
@@ -136,8 +137,9 @@ class TinyMceMenu extends Module {
 
       dom.addEventListener('click', evt => {
         evt.stopPropagation()
-        plugin.call(this, format)
-        this.update(null, plugin, { [plugin._blotName]: format})
+        let value = evt.target.getAttribute('qlvalue')
+        plugin.call(this, value)
+        this.update(null, plugin, { [plugin._blotName]: value })
         clearOtherPopper()
       })
     } else if (format === 'textcolor' || format === 'backgroundcolor') {
@@ -162,10 +164,12 @@ class TinyMceMenu extends Module {
     const fn = (plugin, dom, value) => {
       if (typeof value === 'boolean') {
         value = value
+      } else if (plugin._options) {
+        // do nothing
       } else {
         value = dom.classList.contains('ql-menu-' + value)
       }
-      let checkDom = dom.querySelector('.popper-item-check')
+      let checkDom = dom.querySelector('.ql-menu[qlvalue="' + value +'"] .popper-item-check')
       if (checkDom) {
         css(checkDom, { opacity: value ? '1' : '0' })
       }

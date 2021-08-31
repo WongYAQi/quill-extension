@@ -218,9 +218,6 @@ class FormSelect extends FormSpec {
     input.classList.add('ql-tinymce-form-listbox')
 
     let popper = new SelectPopper(input, this.options)
-    input.addEventListener('click', (evt) => {
-      popper.show(evt)
-    })
 
     container.appendChild(label)
     container.appendChild(input)

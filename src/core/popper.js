@@ -18,8 +18,10 @@ class Popper {
    * 
    * @param {HTMLElement} ref 触发 Popper 的元素 
    * @param { Array<Popper> } parents
+   * @param { 'click' | 'hover' } triggerEvent
+   * @param { Boolean } apendToBody
    */
-  constructor (ref, parents) {
+  constructor (ref, parents, triggerEvent = 'hover', apendToBody = false) {
     this.parents = parents || []
     this.align = 'bottom'
     this.container = document.createElement('div')
@@ -27,7 +29,8 @@ class Popper {
     this.container.classList.add('ql-tinymce-popper')
     this.container.triggerElement = ref
     this.ref = ref
-    this.ref.addEventListener('mouseenter', evt => {
+    this.ref.addEventListener(triggerEvent === 'hover' ? 'mouseenter' : 'click', evt => {
+      evt.stopPropagation()
       this.show(evt)
     })
   }
@@ -38,7 +41,11 @@ class Popper {
   show (evt) {
     PopperManager.clearPopper(this)
     PopperManager.append(...this.parents.concat(this))
-    this.ref.appendChild(this.container)
+    if (this.apendToBody) {
+      document.body.appendChild(this.container)
+    } else {
+      this.ref.appendChild(this.container)
+    }
     this.container.classList.add('is-active')
     this.calculate(evt, this)
   }
@@ -99,7 +106,7 @@ const PopperManager = {
     let stack = activePopper
       ? activePopper.parents.slice()
       : []
-    let localStack = this.stack.slice()
+    let localStack = this.stack
     while (localStack.length) {
       let localLastStack = localStack.pop()
       // 如果 localLastStack 在 stack 中存在，则退出，不存在，则消除当前 localLastStack
@@ -190,14 +197,18 @@ class OptionsPopper extends Popper {
     appendPopperDom(ref, ['popper-item-more'], ArrowRightSVG)
     plugin._options.forEach(opt => {
       let dom = document.createElement('div')
-
       if (plugin._icon && plugin._icon[opt]) {
         appendPopperDom(dom, ['popper-item-icon'], plugin._icon[opt])
       }
       dom.classList.add('ql-menu')
+      dom.setAttribute('qlvalue', opt)
       appendPopperDom(dom, ['popper-item-label'], opt)
       appendPopperDom(dom, ['popper-item-check'], CheckSVG)
-
+      for(let node of dom.children) {
+        css(node, {
+          pointerEvents: 'none'
+        })
+      }
       this.container.appendChild(dom)
     })
 
@@ -216,10 +227,11 @@ class OptionsPopper extends Popper {
 
 /**
  * 在表单中用到的 select 下拉框涉及的 option 弹框
+ * 设计的 Popper 固定了 mouseenter, 和 ref.appendChild 行为
  */
 class SelectPopper extends Popper {
   constructor (ref, options) {
-    super(ref, [])
+    super(ref, [], 'click', true)
     // 为 this.container 添加各种元素，形成options下拉框
     let opts = options.map(o => {
       return this.makeItem(o)
@@ -231,6 +243,7 @@ class SelectPopper extends Popper {
   makeItem (option) {
     let dom = document.createElement('div')
     dom.classList.add('ql-tinymce-listbox-item')
+    dom.innerText = option.label
     return dom
   }
 }

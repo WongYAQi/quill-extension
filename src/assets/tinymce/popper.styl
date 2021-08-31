@@ -18,36 +18,36 @@
     padding: 3px 0
     &:nth-last-child(1)
       border-bottom: none
-    div[class^=ql-menu]
+  div[class^=ql-menu]
+    display: flex
+    height: auto
+    line-height: 24px
+    padding: 4px 8px
+    cursor: pointer
+    &:hover
+      background-color: activeBgColor
+    .popper-item-icon, .popper-item-check, .popper-item-more
+      width: 24px
+      height: 24px
       display: flex
-      height: auto
-      line-height: 24px
-      padding: 4px 8px
-      cursor: pointer
-      &:hover
-        background-color: activeBgColor
-      .popper-item-icon, .popper-item-check, .popper-item-more
-        width: 24px
-        height: 24px
-        display: flex
-        justify-content: center
-        align-items: center
-      .popper-item-check
-        margin-left: 10px
-        opacity: 0
-      .popper-item-label
-        flex: 1
-        font-size: 14px
-        font-weight: 400
-        margin-left: 5px
-      .popper-item-keyboard
-        color: rgba(34,47,62,.7);
-        display: inline-block;
-        font-size: 14px;
-        height: 24px;
-        line-height: 24px;
-        text-transform: none;
-        margin-left: 8px
+      justify-content: center
+      align-items: center
+    .popper-item-check
+      margin-left: 10px
+      opacity: 0
+    .popper-item-label
+      flex: 1
+      font-size: 14px
+      font-weight: 400
+      margin-left: 5px
+    .popper-item-keyboard
+      color: rgba(34,47,62,.7);
+      display: inline-block;
+      font-size: 14px;
+      height: 24px;
+      line-height: 24px;
+      text-transform: none;
+      margin-left: 8px
   .ql-color-group
     .ql-color-item
       width: 24px
