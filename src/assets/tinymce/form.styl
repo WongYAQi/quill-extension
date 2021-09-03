@@ -14,7 +14,7 @@
         line-height: 1.3
         padding: 0 8px 0 0 
         white-space: nowrap
-      .ql-tinymce-form-listbox,
+      .ql-tinymce-form-listbox > .ql-listbox__select,
       .ql-tinymce-form-textfield
         background-color: #fff
         border-radius: 3px
@@ -31,3 +31,17 @@
         width: 100%
         &:focus
           border-color: #207ab7
+      .ql-tinymce-form-listbox > .ql-listbox__select
+        display: flex
+        cursor: pointer
+        .ql-listbox__select-label
+          flex: 1
+          text-align: left
+.ql-tinymce-listbox-panel
+  .ql-tinymce-listbox-item
+    padding: 4px 8px
+    cursor: pointer
+    &:hover
+      background-color: #e3e3e3
+    *
+      pointer-events: none

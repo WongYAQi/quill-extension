@@ -1,12 +1,12 @@
 import Quill from "quill"
-import { Form } from "../../../dialog/Dialog"
+import { Form, hideDialog } from "../../../dialog/Dialog"
 import { FormItemInfos } from "../../../types/Dialog"
 import DialogCore from '../../../dialog/Dialog'
 
 const linkUrl: FormItemInfos = {
   type: 'input',
   label: 'URL',
-  key: 'url'
+  key: 'source'
 }
 const linkText: FormItemInfos = {
   type: 'input',
@@ -37,6 +37,7 @@ export default class Dialog {
   quill: Quill
   form: { source: string; decorative: any[]; description: string; width: string; height: string; isLock: boolean; captions: any[]; class: string }
   dom: HTMLElement
+  core: DialogCore
   constructor (quill: Quill) {
     this.quill = quill
     this.form = {
@@ -50,12 +51,15 @@ export default class Dialog {
       class: ''
     }
     let form = new Form(this.form, FormProps)
-    this.dom = new DialogCore(form.dom, '新增链接', 400, 400, this.save).container
+    this.core = new DialogCore(form.dom, '新增链接', 400, 400, this.save.bind(this))
+    this.dom = this.core.container
   }
   open () {
     document.body.appendChild(this.dom)
   }
   // 保存的时候在当前位置创建一个 text 超链接
-  save () {
+  save (this: Dialog) {
+    this.quill.format('link', this.form, Quill.sources.USER)
+    hideDialog(this.core)
   }
 }

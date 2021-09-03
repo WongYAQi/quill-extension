@@ -1,4 +1,5 @@
 import closeSVG from '../assets/icons/close.svg'
+import ArrowDownSVG from '../assets/icons/arrow-down.svg'
 import { SelectPopper } from '../core/popper'
 import { DialogForm, FormItemInfos } from '../types/Dialog'
 /**
@@ -25,7 +26,7 @@ export default class Dialog {
 
     container.appendChild(mask)
     mask.appendChild(content)
-    content.appendChild(createDialogHeader(title))
+    content.appendChild(createDialogHeader(this, title))
     content.appendChild(createDialogContent(ref))
     content.appendChild(createDialogFooter(this, fnSave))
 
@@ -37,18 +38,19 @@ export default class Dialog {
   }
 }
 
-function hideDialog (dialog: Dialog) {
+export function hideDialog (dialog: Dialog) {
   dialog.container.remove()
 }
 
-function createDialogHeader (title: string) {
+function createDialogHeader (dialog: Dialog, title: string) {
   let header = document.createElement('div')
   let span = document.createElement('span')
   let close = document.createElement('i')
   span.innerHTML = title
   close.innerHTML = closeSVG
   span.classList.add('ql-dialog__text')
-  close.classList.add('ql-dialog__text')
+  close.classList.add('ql-dialog__close')
+  close.addEventListener('click', evt => hideDialog(dialog))
   header.appendChild(span)
   header.appendChild(close)
 
@@ -80,6 +82,7 @@ function createDialogFooter (dialog: Dialog, fnSave: () => void) {
   closeBtn.addEventListener('click', evt => {
     hideDialog(dialog)
   })
+  end.appendChild(closeBtn)
 
   if (fnSave) {
     closeBtn.classList.add('secondary')
@@ -92,7 +95,6 @@ function createDialogFooter (dialog: Dialog, fnSave: () => void) {
     })
   }
 
-  end.appendChild(closeBtn)
   footer.appendChild(start)
   footer.appendChild(end)
   return footer
@@ -153,7 +155,9 @@ class FormInput extends FormSpec {
     dom.appendChild(label)
     dom.appendChild(input)
     input.addEventListener("input", evt => {
-      this.model[this.key] = evt.returnValue
+      if (evt.target instanceof HTMLInputElement) {
+        this.model[this.key] = evt.target.value
+      }
     })
     return dom
   }
@@ -214,14 +218,35 @@ class FormSelect extends FormSpec {
     let container = this.makeContainer()
     let label = this.makeLabel(id)
 
-    let input = document.createElement('input')
+    let input = document.createElement('div')
     input.classList.add('ql-tinymce-form-listbox')
 
-    let popper = new SelectPopper(input, this.options)
+    let button = document.createElement('button')
+    let span = document.createElement('span')
+    let icon = document.createElement('i')
+    icon.innerHTML = ArrowDownSVG
+    button.classList.add('ql-listbox__select')
+    span.classList.add('ql-listbox__select-label')
+    icon.classList.add('ql-listbox__select-icon')
+    button.appendChild(span)
+    button.appendChild(icon)
+    input.appendChild(button)
 
     container.appendChild(label)
     container.appendChild(input)
+    let popper = new SelectPopper(button, this.options)
+    popper.container.addEventListener('click', this.handleClick.bind(this))
     return container
+  }
+  handleClick (evt: MouseEvent) {
+    if (evt.target instanceof HTMLElement && evt.target.getAttribute('data-value')) {
+      let value = evt.target.getAttribute('data-value')
+      this.model[this.key] = value
+      let label = this.dom.querySelector('.ql-listbox__select-label')
+      if (label) {
+        label.innerHTML = evt.target.innerText
+      }
+    }
   }
 }
 

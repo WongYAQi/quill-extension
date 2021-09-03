@@ -21,8 +21,9 @@ class Popper {
    * @param { 'click' | 'hover' } triggerEvent
    * @param { Boolean } apendToBody
    */
-  constructor (ref, parents, triggerEvent = 'hover', apendToBody = false) {
+  constructor (ref, parents, triggerEvent = 'hover', appendToBody = false) {
     this.parents = parents || []
+    this.appendToBody = appendToBody
     this.align = 'bottom'
     this.container = document.createElement('div')
     this.container.classList.add('ql-tinymce')
@@ -31,6 +32,7 @@ class Popper {
     this.ref = ref
     this.ref.addEventListener(triggerEvent === 'hover' ? 'mouseenter' : 'click', evt => {
       evt.stopPropagation()
+      evt.preventDefault()
       this.show(evt)
     })
   }
@@ -41,7 +43,7 @@ class Popper {
   show (evt) {
     PopperManager.clearPopper(this)
     PopperManager.append(...this.parents.concat(this))
-    if (this.apendToBody) {
+    if (this.appendToBody) {
       document.body.appendChild(this.container)
     } else {
       this.ref.appendChild(this.container)
@@ -244,7 +246,15 @@ class SelectPopper extends Popper {
     let dom = document.createElement('div')
     dom.classList.add('ql-tinymce-listbox-item')
     dom.innerText = option.label
+    dom.setAttribute('data-value', option.value)
     return dom
+  }
+  show (evt) {
+    let rect = this.ref.getBoundingClientRect()
+    css(this.container, {
+      width: rect.width + 'px'
+    })
+    super.show(evt)
   }
 }
 
